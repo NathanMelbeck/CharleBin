@@ -32,16 +32,22 @@ class Filter
      * @throws Exception
      * @return string
      */
-    public static function formatHumanReadableTime($time, $unit)
+    public static function formatHumanReadableTime($time)
     {
-        $time = (int) $time;
-        if ($time < 0) {
-            throw new Exception('Invalid time');
+        if (preg_match('/^(\d+) *(\w+)$/', $time, $matches) !== 1) {
+            throw new Exception("Error parsing time format '$time'", 30);
         }
-        $time = $time . $unit;
-        $time = strtotime($time);
-        $time = date('Y-m-d H:i:s', $time);
-        return I18n::_($time);
+        switch ($matches[2]) {
+            case 'sec':
+                $unit = 'second';
+                break;
+            case 'min':
+                $unit = 'minute';
+                break;
+            default:
+                $unit = rtrim($matches[2], 's');
+        }
+        return I18n::_(array('%d ' . $unit, '%d ' . $unit . 's'), (int) $matches[1]);
     }
 
     /**
@@ -63,6 +69,5 @@ class Filter
         return number_format($size, ($i ? 2 : 0), '.', ' ') . ' ' . I18n::_($iec[$i]);
     }
     
-
     
 }
